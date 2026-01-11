@@ -3,6 +3,8 @@ import OrderDetails from '#models/order_details'
 import Order from '#models/order'
 import { DateTime } from 'luxon'
 import db from '@adonisjs/lucid/services/db'
+import Product from '#models/product'
+import Stock from '#models/stock'
 
 
 export default class OrdersController {
@@ -19,6 +21,15 @@ export default class OrdersController {
                     orderDetailsave.orderId = orderID
                     orderDetailsave.productId = element.productId
                     orderDetailsave.quantity = element.quantity
+                    const product = await Product.find(element.productId)
+                    //rebajar de invetario 
+                    if (product) { 
+                       const stock = await Stock.findBy('stock_product_id', product.stockProductId)
+                       if(stock){
+                        stock.total_units = stock.total_units - element.quantity* product.contentUnits  
+                        await stock.save()                             
+                       }
+                    }
                     await orderDetailsave.save()
                 }
                 return response.created({ message: 'Order created successfully' })
@@ -46,8 +57,6 @@ export default class OrdersController {
                 db.raw('SUM(order_details.quantity * products.price) as total')
             )
             .groupBy('products.id')
-
-
 
         return response.ok(ventas)
 
