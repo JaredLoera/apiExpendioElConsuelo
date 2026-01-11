@@ -1,7 +1,8 @@
 import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
+import Product from './product.js'
 
-export default class Product extends BaseModel {
+export default class StockProduct extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
@@ -29,8 +30,7 @@ export default class Product extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-
-    static getOnlyCharolaProducts() {
-    return this.query().where('contentUnits', 24).orWhere('contentUnits', 12)
+  static getOnlyCharolaProducts() {
+    return Product.query().where('contentUnits', 24).orWhere('contentUnits', 12)
   }
 }
